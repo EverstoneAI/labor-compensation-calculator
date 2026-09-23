@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>劳动补偿计算器</title>
+<style>
+:root{--bg:#EDF3EF;--card:#FFFFFF;--ink:#16241D;--ink2:#4F5F57;--ink3:#84938B;--acc:#1B5E20;--acc2:#2E7D46;--acc-soft:#E8F2EA;--line:#D8E3DC;--warn:#B4451F;--ok:#1F7A4D;--shadow:0 1px 2px rgba(20,50,35,.05),0 10px 28px rgba(20,50,35,.07)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"PingFang SC","Microsoft YaHei","Segoe UI",system-ui,sans-serif;line-height:1.7}
+.hero{background:linear-gradient(135deg,#12402F 0%,#1B5E20 55%,#2E7D46 100%);color:#fff;padding:34px 20px 64px;position:relative;overflow:hidden}
+.hero::before{content:"";position:absolute;inset:0;background:radial-gradient(620px 300px at 88% -70px,rgba(255,255,255,.16),transparent 70%),radial-gradient(520px 280px at 4% 140%,rgba(255,255,255,.09),transparent 70%);pointer-events:none}
+.hero-in{max-width:960px;margin:0 auto;display:flex;gap:16px;align-items:flex-start;flex-wrap:wrap;position:relative}
+.logo{width:54px;height:54px;border-radius:16px;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.26);display:flex;align-items:center;justify-content:center;flex:none}
+.hero-t{flex:1;min-width:260px}
+h1{font-size:26px;margin:2px 0 6px;font-weight:700;letter-spacing:.02em}
+.sub{color:#D3E5D8;font-size:13.5px;margin:0;max-width:680px}
+.chips{display:flex;gap:8px;flex-wrap:wrap;padding-top:6px}
+.chip{background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.28);color:#E8F2EA;border-radius:999px;padding:3px 12px;font-size:12px;white-space:nowrap}
+.chip::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:#9CD9B0;margin-right:7px;vertical-align:1px}
+.wrap{max-width:960px;margin:-36px auto 0;padding:0 20px 30px;position:relative}
+.bound{background:#FFF6EF;border:1px solid #EFD3BE;border-left:4px solid var(--warn);border-radius:12px;padding:12px 16px;font-size:13px;color:#7C3A22;font-weight:700;margin-bottom:16px;line-height:1.7;box-shadow:var(--shadow)}
+.panel{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px 22px;margin-bottom:16px;box-shadow:var(--shadow)}
+.panel h2{margin:0 0 6px;font-size:17px;display:flex;align-items:center;gap:10px;line-height:1.5}
+.panel h2::before{content:"";flex:none;width:6px;height:20px;border-radius:3px;background:linear-gradient(180deg,var(--acc2),var(--acc))}
+.panel .why{color:var(--ink3);font-size:12.5px;margin:0 0 12px}
+label{display:block;font-size:13px;color:var(--ink2);margin:0 0 5px;font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:720px){.grid{grid-template-columns:1fr}}
+input,select{width:100%;padding:9px 12px;border:1px solid #C9D8CF;border-radius:10px;font:inherit;font-size:14px;background:#FBFDFC;color:var(--ink)}
+input:focus,select:focus{outline:none;border-color:var(--acc2);box-shadow:0 0 0 3px rgba(46,125,70,.16)}
+.hint{color:var(--ink3);font-size:12px;margin-top:4px}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:13px}
+button{font:inherit;font-size:14px;font-weight:600;padding:10px 22px;border-radius:10px;border:1px solid transparent;background:linear-gradient(180deg,var(--acc2),var(--acc));color:#fff;cursor:pointer;box-shadow:0 2px 10px rgba(27,94,32,.3);transition:transform .12s,box-shadow .12s}
+button:hover{transform:translateY(-1px);box-shadow:0 5px 14px rgba(27,94,32,.34)}
+button:active{transform:translateY(0)}
+button.ghost{background:#fff;color:var(--acc);border-color:#C9D8CF;box-shadow:none}
+button.ghost:hover{background:var(--acc-soft);border-color:var(--acc2);box-shadow:0 3px 8px rgba(27,94,32,.12)}
+button:disabled{opacity:.45;cursor:not-allowed;transform:none;box-shadow:none}
+.group{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--acc);border-radius:14px;padding:16px 18px;margin-bottom:14px;box-shadow:var(--shadow)}
+.group h3{margin:0 0 10px;font-size:15.5px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.group h3 span{font-size:12px;color:var(--ink2);font-weight:600;background:#EEF4EF;border:1px solid var(--line);border-radius:999px;padding:2px 11px;white-space:nowrap}
+.hit{border-top:1px dashed var(--line);padding:10px 0 4px}
+.hit:first-of-type{border-top:0}
+.big{background:#F2F8F3;border:1px solid #CBE2D1;border-radius:10px;padding:10px 14px;font-size:14px;margin:6px 0 10px}
+.big b{font-size:19px;color:var(--acc)}
+.big .law{display:block;font-size:12px;color:var(--ink3);margin-top:2px}
+.fix{font-size:13px;color:var(--ink2)}
+.fix b{color:var(--ok)}
+.empty{color:var(--ink3);font-size:13px}
+.summary{display:flex;gap:12px;flex-wrap:wrap;margin:0 0 14px;font-size:13px;color:var(--ink2)}
+.summary>div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 16px;box-shadow:var(--shadow)}
+.summary b{font-size:19px;color:var(--acc)}
+.notewarn{background:#FFF8EC;border:1px solid #EFE0C8;border-left:4px solid #D9A026;border-radius:10px;padding:9px 13px;font-size:12.5px;color:#7A6242;margin-top:12px}
+.danger{background:#FDF0EC;border:1px solid #EBC7BC;border-left:4px solid var(--warn);border-radius:10px;padding:9px 13px;font-size:12.5px;color:#8C3B22;margin-top:12px;font-weight:700}
+.foot{color:var(--ink3);font-size:12.5px;margin-top:26px;border-top:1px solid var(--line);padding-top:14px;line-height:1.9}
+.foot2{max-width:920px;margin:0 auto 46px;padding-top:16px;border-top:1px solid var(--line);font-size:12.5px;color:var(--ink3);line-height:1.9}
+details.sub{border:1px solid var(--line);border-radius:10px;margin:8px 0 2px;background:#FBFDFC}
+details.sub summary{cursor:pointer;padding:8px 12px;font-size:13px;color:var(--ink2);font-weight:700}
+.months{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;padding:4px 12px 12px}
+@media(max-width:640px){.months{grid-template-columns:repeat(3,1fr)}}
+.months label{font-size:11.5px;color:var(--ink3);font-weight:400;margin:0 0 2px}
+.chkline{display:flex;gap:8px;align-items:flex-start;font-size:13px;color:var(--ink2);margin-top:8px;cursor:pointer}
+.chkline input{width:16px;height:16px;accent-color:var(--acc);margin-top:3px;flex:none}
+@media(max-width:640px){.hero{padding:26px 16px 56px}h1{font-size:22px}.logo{width:44px;height:44px;border-radius:12px}.logo svg{width:24px;height:24px}.panel{padding:16px 14px}.wrap{padding:0 14px 24px}}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="hero-in">
+    <div class="logo"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="5" y="2.5" width="14" height="19" rx="2"/><path d="M8.5 6.5h7"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01M8.5 14.5h.01M12 14.5h.01M15.5 14.5h.01M8.5 18h.01M12 18h.01M15.5 18h.01"/></svg></div>
+    <div class="hero-t">
+      <h1>劳动补偿计算器</h1>
+      <div class="sub">离职能拿什么（N／N+1／2N／无）、未休年假折算、加班费——按法定标准逐项算给你看，每一项都附法条出处。</div>
+    </div>
+    <div class="chips"><span class="chip">本机运行</span><span class="chip">文字不上传</span><span class="chip">完全不联网</span></div>
+  </div>
+</header>
+<div class="wrap">
+  <div class="bound">⚠ 本工具只计算法定标准，不构成法律意见；协议约定、仲裁与判决的实际结果可能不同。具体问题请咨询律师、拨打公共法律服务热线 12348 或联系当地劳动人事争议仲裁机构。</div>
+
+  <div class="panel">
+    <h2>一、你的情况</h2>
+    <div class="why">选「怎么离开的」，工具按《劳动合同法》及实施条例给出结论：能拿什么、多少钱、依据哪一条。</div>
+    <label for="scen">怎么离开的</label>
+    <select id="scen">
+      <option value="1">单位提出，双方协商一致解除</option>
+      <option value="2">我主动辞职（个人原因）</option>
+      <option value="3">我被迫辞职（未足额发工资 / 未缴社保 / 未提供劳动条件等）</option>
+      <option value="4">单位无过错辞退，提前 30 日书面通知（医疗期满 / 不胜任 / 客观情况重大变化）</option>
+      <option value="5">同上情形，但单位未提前 30 日通知</option>
+      <option value="6">经济性裁员</option>
+      <option value="7">合同到期，单位不续签，或降低条件续签我不同意</option>
+      <option value="8">合同到期，单位维持或提高条件续签，我不续</option>
+      <option value="9">单位破产 / 吊销 / 关闭 / 提前解散</option>
+      <option value="10">以完成一定工作任务为期限的合同，任务完成</option>
+      <option value="11">单位违法解除 / 终止（事实、理由、程序任一不合法）</option>
+      <option value="12">我达到法定退休年龄，合同终止</option>
+    </select>
+
+    <div class="grid" style="margin-top:12px">
+      <div><label for="dIn">入职日期</label><input type="date" id="dIn"></div>
+      <div><label for="dOut">离职日期</label><input type="date" id="dOut"></div>
+    </div>
+
+    <label for="avg" style="margin-top:12px">解除前 12 个月平均应得工资（元/月）</label>
+    <input type="number" id="avg" min="0" step="0.01" placeholder="如 8000">
+    <div class="hint">按应得工资算：含计时/计件工资＋奖金＋津贴补贴＋单位代扣的社保、个税、公积金个人部分。不是合同基本工资，也不是实发到手（实施条例 27 条）。不满 12 个月按实际月份平均——可展开逐月填。</div>
+    <details class="sub"><summary>逐月填（不满 12 个月或各月差异大时用）</summary>
+      <div class="months" id="months"></div>
+    </details>
+
+    <div class="grid" style="margin-top:12px">
+      <div><label for="minw">当地最低工资标准（元/月）</label><input type="number" id="minw" min="0" step="0.01" placeholder="低于它按它算"><div class="hint">平均工资低于最低工资 → 按最低工资（实施条例 27 条）</div></div>
+      <div><label for="socavg">当地上年度职工月平均工资（元/月）</label><input type="number" id="socavg" min="0" step="0.01" placeholder="高于它 3 倍触发封顶"><div class="hint">月工资超它 3 倍 → 按 3 倍算且年限封顶 12 年（47 条 2 款）</div></div>
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <div><label for="lastm">上一个月工资标准（元/月）——代通知金用</label><input type="number" id="lastm" min="0" step="0.01" placeholder="仅情形 5 用到"><div class="hint">只有「无过错辞退且未提前 30 日通知」才有 +1（实施条例 20 条）</div></div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h2>二、未休年假折算（可选，任何离开方式都能主张）</h2>
+    <div class="why">未休天数 × 日工资 × 300%（其中 200% 是额外补偿）；不想算就全部留空。</div>
+    <div class="grid">
+      <div><label for="ytenure">累计工作年限（含前单位，按社保记录）</label>
+        <select id="ytenure"><option value="">不计算</option><option value="5">满 1 年不满 10 年 → 应休 5 天/年</option><option value="10">满 10 年不满 20 年 → 应休 10 天/年</option><option value="15">满 20 年 → 应休 15 天/年</option></select>
+        <div class="hint">「累计工作」含在不同单位的工作时间（人社厅函〔2009〕149 号）</div></div>
+      <div><label for="ydays">离职当年应休天数参考（自动折算）</label><input type="text" id="yref" readonly placeholder="选年限后自动按日历折算"><div class="hint">点「开始计算」后按离职日自动折算：(当年日历天数÷365)×应休天数，不足 1 天不计</div></div>
+    </div>
+    <div class="grid" style="margin-top:12px">
+      <div><label for="yunused">实际未休天数（天）</label><input type="number" id="yunused" min="0" step="1" placeholder="如 3"></div>
+      <div><label for="yavg">月平均工资——剔除加班费口径（元/月）</label><input type="number" id="yavg" min="0" step="0.01" placeholder="与上面 12 个月口径不同"><div class="hint">年假日工资 = 此月均 ÷ 21.75（实施办法 12 条口径）</div></div>
+    </div>
+    <label class="chkline"><input type="checkbox" id="ygiveup"><span>我本人书面提出不休年假（这样只发正常工资，没有额外 200% 补偿）</span></label>
+  </div>
+
+  <div class="panel">
+    <h2>三、加班费（可选，⚠ 各地基数口径不一）</h2>
+    <div class="why">150% / 200%（休息日不能补休）/ 300%（法定节假日）为劳动法 44 条标准。计算基数各地口径不一（北京=约定优先、上海=正常出勤月工资、广东=可约定不低于最低工资），请自填并自行核对当地口径。</div>
+    <div class="grid">
+      <div><label for="obase">加班费基数（元/月，自填）</label><input type="number" id="obase" min="0" step="0.01" placeholder="以当地口径为准"></div>
+      <div><label for="oh1">平时延长工作时间（小时，累计）</label><input type="number" id="oh1" min="0" step="0.5" placeholder="×150%"></div>
+      <div><label for="oh2">休息日加班且未补休（小时）</label><input type="number" id="oh2" min="0" step="0.5" placeholder="×200%"></div>
+      <div><label for="oh3">法定节假日加班（小时）</label><input type="number" id="oh3" min="0" step="0.5" placeholder="×300%"></div>
+    </div>
+    <div class="hint" style="margin-top:8px">小时工资 = 基数 ÷ 21.75 ÷ 8；休息日如已安排补休则该部分为 0，法定节假日不能用补休代替。</div>
+  </div>
+
+  <div class="row">
+    <button id="run">开始计算</button>
+    <button id="clr" class="ghost">清空</button>
+    <button id="copy" class="ghost" disabled>复制结果</button>
+    <span class="hint" id="state"></span>
+  </div>
+
+  <div id="result" style="margin-top:16px"></div>
+
+  <div class="foot">
+    本工具只计算法定标准，不构成法律意见；协议约定、仲裁与判决的实际结果可能不同。具体问题请咨询律师、拨打公共法律服务热线 12348 或联系当地劳动人事争议仲裁机构。<br>
+    劳动补偿计算器 · 单文件网页，双击即用，不联网、不上传 ｜ 交付方：浮石录 · AI 工具定制<br>
+    ——计算结果由工具生成，人工复核后交付。
+  </div>
+</div>
+
+<script>
+const $ = function(s){ return document.querySelector(s); };
+const SCEN = {
+  1:{t:"N", law:"劳动合同法 36 条、46 条第(二)项"},
+  2:{t:"无", law:"劳动合同法 37 条（38 条情形除外）", note:"无法定经济补偿；但你已提供劳动的工资应当足额结清。"},
+  3:{t:"N", law:"劳动合同法 38 条、46 条第(一)项"},
+  4:{t:"N", law:"劳动合同法 40 条、46 条第(三)项"},
+  5:{t:"N+1", law:"劳动合同法 40 条、46 条第(三)项，实施条例 20 条", note:"+1 是代通知金，按上一个月的工资标准计。"},
+  6:{t:"N", law:"劳动合同法 41 条、46 条第(四)项"},
+  7:{t:"N", law:"劳动合同法 44 条第(一)项、46 条第(五)项"},
+  8:{t:"无", law:"劳动合同法 46 条第(五)项但书"},
+  9:{t:"N", law:"劳动合同法 44 条第(四)(五)项、46 条第(六)项"},
+  10:{t:"N", law:"劳动合同法实施条例 22 条"},
+  11:{t:"2N", law:"劳动合同法 87 条（与 N 择一，不可兼得）", note:"赔偿金与经济补偿只能选一个主张：要了 2N 就不能再要 N。"},
+  12:{t:"无", law:"劳动合同法实施条例 21 条", note:"达到法定退休年龄终止的，按此口径不支持经济补偿。"}
+};
+const MISCON = [
+  "「被裁都有 N+1」——错。+1（代通知金）只在无过错辞退（40 条三种情形）且未提前 30 日书面通知时才有，经济性裁员、协商解除都没有。",
+  "「2N 和 N 能一起要」——不能，二者择一（87 条：按 47 条标准的二倍支付赔偿金）。",
+  "「按基本工资 / 实发工资算」——错。按应得工资算：含奖金、津贴补贴、单位代扣的社保公积金个税个人部分（实施条例 27 条）。",
+  "「到龄退休终止也有补偿」——实施条例 21 条口径不支持。",
+  "「高工资就按全额乘年限」——月工资超当地社平 3 倍的，按 3 倍算且年限封顶 12 年（47 条 2 款，仅适用经济补偿 N）。"
+];
+const EDGES = [
+  "2008-01-01 前入职的，经济补偿按新旧规定分段计算，本工具未覆盖分段——建议咨询律师或当地劳动仲裁。",
+  "医疗期、工伤停工留薪期内解除等特殊保护期情形未覆盖。",
+  "各地仲裁与法院存在裁量差异（例如 2N 年限是否封顶，主流观点不受 12 年封顶、基数仍封顶，但各地裁判略有差异）。",
+  "劳务派遣、非全日制用工、实习生等特殊用工形态未覆盖。",
+  "协议金额可高于或低于法定标准，本工具只算法定标准，不代表你实际能拿到的数额。"
+];
+function esc(s){ return String(s).replace(/[&<>]/g, function(m){ return {"&":"&amp;","<":"&lt;",">":"&gt;"}[m]; }); }
+function fmt(n){ return n.toLocaleString("zh-CN", {minimumFractionDigits:2, maximumFractionDigits:2}); }
+function num(id){ var v = parseFloat($("#"+id).value); return isFinite(v) && v >= 0 ? v : NaN; }
+function yearsOfService(sin, sout){
+  var sy = sin.getFullYear(), sm = sin.getMonth(), sd = sin.getDate();
+  var ey = sout.getFullYear(), em = sout.getMonth(), ed = sout.getDate();
+  if(sout < new Date(sy, sm, sd)) return null;
+  var years = ey - sy;
+  if(new Date(ey, sm, sd) > sout) years--;
+  if(years < 0) years = 0;
+  var remMonths = (ey - (sy + years)) * 12 + (em - sm);
+  if(ed < sd) remMonths--;
+  if(remMonths < 0) remMonths = 0;
+  return {years: years, rem: remMonths};
+}
+function nMonths(yr){ return yr.rem >= 6 ? yr.years + 1 : yr.rem > 0 ? yr.years + 0.5 : yr.years; }
+/* 逐月输入 */
+(function(){
+  var box = $("#months"), h = "";
+  for(var i = 0; i < 12; i++){ h += "<div><label>第 " + (i+1) + " 个月前</label><input type='number' class='mi' min='0' step='0.01' data-i='" + i + "'></div>"; }
+  box.innerHTML = h;
+})();
+function avgWage(){
+  var mis = Array.prototype.map.call(document.querySelectorAll(".mi"), function(x){ return x.value.trim() === "" ? null : parseFloat(x.value); });
+  var vals = mis.filter(function(v){ return v !== null && isFinite(v) && v >= 0; });
+  if(vals.length){
+    var sum = vals.reduce(function(a, b){ return a + b; }, 0);
+    return {v: sum / vals.length, src: "按实际 " + vals.length + " 个月平均（实施条例 27 条）"};
+  }
+  var v = num("avg");
+  return isFinite(v) ? {v: v, src: "你填的 12 个月平均"} : null;
+}
+var lastReport = null;
+function calc(){
+  var scen = $("#scen").value;
+  var sIn = $("#dIn").value ? new Date($("#dIn").value + "T00:00:00") : null;
+  var sOut = $("#dOut").value ? new Date($("#dOut").value + "T00:00:00") : null;
+  var law = SCEN[scen];
+  var minw = num("minw"), socavg = num("socavg"), lastm = num("lastm");
+  var aw = avgWage();
+  var total = 0, rep = [], out = {};
+  var compHtml = "";
+
+  if(law.t === "无"){
+    compHtml = '<div class="big">无法定经济补偿<span class="law">出处：' + esc(law.law) + '</span></div>' +
+      (law.note ? '<div class="fix">' + esc(law.note) + '</div>' : "");
+    rep.push("无法定经济补偿（" + law.law + "）");
+  } else {
+    var msg = [];
+    if(!sIn || !sOut) msg.push("填入职和离职日期才能算年限");
+    if(!aw) msg.push("填平均应得工资（或逐月填）");
+    if(law.t === "N+1" && !isFinite(lastm)) msg.push("情形 5 需要填「上一个月工资标准」来算代通知金");
+    if(msg.length){
+      compHtml = '<div class="fix">还差：<b>' + msg.join("；") + '</b>。</div>';
+    } else if(sOut < sIn){
+      compHtml = '<div class="fix">离职日期早于入职日期，检查一下。</div>';
+    } else {
+      var yr = yearsOfService(sIn, sOut);
+      var n = nMonths(yr);
+      var yearsText = yr.years + " 年零 " + yr.rem + " 个月 → 折算 " + n + " 个月" +
+        (yr.rem >= 6 ? "（剩满 6 个月按 1 年算，47 条）" : yr.rem > 0 ? "（不满 6 个月按半个月工资，47 条）" : "");
+      out.yearsText = yearsText;
+      var base = aw.v, baseNote = [];
+      if(isFinite(minw) && base < minw){ base = minw; baseNote.push("低于当地最低工资，按最低工资兜底（实施条例 27 条）"); }
+      var capped = isFinite(socavg) && base > socavg * 3;
+      if(capped){ base = socavg * 3; baseNote.push("月工资超社平 3 倍：基数按 3 倍封顶（47 条 2 款）"); }
+      var baseLine = '<div class="fix">基数：' + esc(aw.src) + "，" + fmt(base) + " 元/月" +
+        (baseNote.length ? "；" + baseNote.map(esc).join("；") : "") + '。</div>' +
+        '<div class="fix">工作年限：' + esc(yearsText) + (capped ? "；经济补偿年限另封顶 12 年" : "") + '。</div>';
+
+      if(law.t === "2N"){
+        /* 87 条：按 47 条标准的二倍。主流口径（人社部 2024 年答复、多数判例）：12 年年限封顶仅约束
+           高薪者的经济补偿 N，赔偿金年限不封顶；但基数 3 倍社平封顶仍适用。各地略有差异，页面标注。 */
+        var amt2 = base * n * 2;
+        total += amt2; out.n = amt2;
+        compHtml = '<div class="big"><b>' + fmt(amt2) + '</b> 元（赔偿金 2N）' +
+          '<span class="law">= 基数 ' + fmt(base) + ' 元/月 × ' + n + ' 个月 × 2 ｜ 出处：' + esc(law.law) + '</span></div>' + baseLine +
+          '<div class="fix"><b>口径标注：</b>12 年年限封顶仅适用高薪者的经济补偿（N），赔偿金年限按主流口径不封顶，但基数 3 倍社平封顶仍适用；与 N 择一、不可兼得；各地裁判略有差异，主张前可再核当地口径。</div>';
+        rep.push("赔偿金（2N）：" + fmt(amt2) + " 元（基数 " + fmt(base) + " × " + n + " 个月 × 2）");
+      } else {
+        var yearsUsed = capped ? Math.min(n, 12) : n;
+        var amt = base * yearsUsed;
+        total += amt; out.n = amt;
+        compHtml = '<div class="big"><b>' + fmt(amt) + '</b> 元（经济补偿 ' + law.t + '）' +
+          '<span class="law">= 基数 ' + fmt(base) + ' 元/月 × ' + yearsUsed + ' 个月 ｜ 出处：' + esc(law.law) + '</span></div>' +
+          '<div class="fix">工作年限：' + esc(yearsText) + (capped ? "；高薪封顶后按 " + yearsUsed + " 个月（47 条 2 款）" : "") + '。</div>' + baseLine;
+        rep.push("经济补偿（" + law.t + "）：" + fmt(amt) + " 元（基数 " + fmt(base) + " × " + yearsUsed + " 个月）");
+        if(law.t === "N+1"){
+          total += lastm; out.dai = lastm;
+          compHtml += '<div class="big"><b>' + fmt(lastm) + '</b> 元（+1 代通知金，按上一个月工资标准）<span class="law">出处：实施条例 20 条</span></div>';
+          rep.push("代通知金（+1）：" + fmt(lastm) + " 元（实施条例 20 条）");
+        }
+      }
+    }
+  }
+  var html = '<div class="group"><h3>一、' + esc($("#scen").selectedOptions[0].textContent) + '<span>能拿什么：' + law.t + '</span></h3>' + compHtml + '</div>';
+
+  /* 年假 */
+  var yten = $("#ytenure").value, ydays = num("yunused"), yavg = num("yavg");
+  if(yten || isFinite(ydays)){
+    var yHTML = "";
+    if(yten && sOut){
+      var doy = Math.floor((sOut - new Date(sOut.getFullYear(), 0, 1)) / 86400000) + 1;
+      var ref = Math.floor(doy / 365 * (+yten));
+      $("#yref").value = ref + " 天（按 " + doy + "/365 折算，不足 1 天不计）";
+    }
+    if(isFinite(ydays) && isFinite(yavg) && ydays > 0){
+      var daily = yavg / 21.75;
+      if($("#ygiveup").checked){
+        yHTML = '<div class="big"><b>0.00</b> 元额外补偿<span class="law">本人书面提出不休：只发正常工资，无额外 200%（实施办法 10 条）</span></div>';
+        rep.push("未休年假：本人书面放弃，额外补偿 0 元");
+      } else {
+        var extra = daily * ydays * 2;
+        total += extra;
+        yHTML = '<div class="big"><b>' + fmt(extra) + '</b> 元额外年假补偿<span class="law">= ' + ydays + ' 天 × 日工资 ' + fmt(daily) + ' 元 × 200%（300% 总额口径中 100% 为已发正常工资）｜ 出处：年休假条例 5 条、实施办法 12 条</span></div>';
+        rep.push("未休年假额外补偿：" + fmt(extra) + " 元（" + ydays + " 天 × " + fmt(daily) + " 元 × 200%）");
+      }
+    } else {
+      yHTML = '<div class="fix">再填「未休天数」和「月平均工资（剔除加班费）」才算得出金额。</div>';
+    }
+    html += '<div class="group"><h3>二、未休年假折算<span>任何离开方式都能主张</span></h3>' + yHTML + '</div>';
+  }
+
+  /* 加班费 */
+  var ob = num("obase"), oh1 = num("oh1"), oh2 = num("oh2"), oh3 = num("oh3");
+  if(isFinite(ob) && (isFinite(oh1) || isFinite(oh2) || isFinite(oh3))){
+    var hr = ob / 21.75 / 8;
+    var p1 = (isFinite(oh1) ? oh1 : 0) * 1.5 * hr;
+    var p2 = (isFinite(oh2) ? oh2 : 0) * 2 * hr;
+    var p3 = (isFinite(oh3) ? oh3 : 0) * 3 * hr;
+    var obSum = p1 + p2 + p3;
+    total += obSum;
+    html += '<div class="group"><h3>三、加班费<span>劳动法 44 条</span></h3>' +
+      '<div class="big"><b>' + fmt(obSum) + '</b> 元<span class="law">小时工资 ' + fmt(hr) + ' 元 = 基数 ' + fmt(ob) + ' ÷ 21.75 ÷ 8</span></div>' +
+      '<div class="fix">平时 ' + (oh1 || 0) + 'h×150%=' + fmt(p1) + ' 元；休息日未补休 ' + (oh2 || 0) + 'h×200%=' + fmt(p2) + ' 元；法定节假日 ' + (oh3 || 0) + 'h×300%=' + fmt(p3) + ' 元。</div>' +
+      '<div class="notewarn">基数各地口径不一（北京=约定优先、上海=正常出勤月工资、广东=可约定但不低于最低工资），请自行核对当地规定。</div></div>';
+    rep.push("加班费：" + fmt(obSum) + " 元（基数 " + fmt(ob) + "，小时工资 " + fmt(hr) + "）");
+  }
+
+  /* 合计 */
+  if(total > 0){
+    html = '<div class="summary"><div>按法定口径合计 <b>' + fmt(total) + '</b> 元</div><div>不含协议金额与存在争议的部分</div></div>' + html;
+    rep.unshift("按法定口径合计：" + fmt(total) + " 元");
+  } else if(law.t === "无"){
+    html = '<div class="summary"><div>此情形无法定经济补偿</div></div>' + html;
+  }
+
+  /* 误区 + 边界 + 免责 */
+  var mis = MISCON.map(function(m){ return '<div class="hit"><div class="fix">' + esc(m) + '</div></div>'; }).join("");
+  html += '<div class="group"><h3>常见误区澄清<span>本工具的差异化价值</span></h3>' + mis + '</div>';
+  var edgeHtml = EDGES.map(function(m){ return '<div class="hit"><div class="fix">' + esc(m) + '</div></div>'; }).join("");
+  if(sIn && sIn < new Date(2008, 0, 1)){
+    edgeHtml = '<div class="danger">你填的入职日期在 2008-01-01 之前：2008 年前后的经济补偿要按新旧规定分段计算，本工具未覆盖分段，结果偏低——建议咨询律师或当地劳动仲裁。</div>' + edgeHtml;
+  }
+  html += '<div class="group"><h3>本工具不覆盖（防翻车说明）<span>v1 边界</span></h3>' + edgeHtml + '</div>';
+  html += '<div class="group"><h3>结果末尾必读<span>免责</span></h3><div class="fix">本工具只计算法定标准，不构成法律意见；协议约定、仲裁与判决的实际结果可能不同。要不要主张、怎么主张，由你自己决定；具体问题请咨询律师、拨打公共法律服务热线 12348 或联系当地劳动人事争议仲裁机构。</div></div>';
+
+  $("#result").innerHTML = html;
+  $("#state").textContent = "算完了。只算法定标准，结果请人工复核。";
+  var repText = "【劳动补偿计算器】计算结果\n情形：" + $("#scen").selectedOptions[0].textContent + " → 能拿什么：" + law.t + "\n" +
+    rep.join("\n") + "\n\n本工具只计算法定标准，不构成法律意见。具体问题请咨询律师、拨打 12348 或联系当地劳动人事争议仲裁机构。\n——计算结果由工具生成，人工复核后交付。";
+  lastReport = repText;
+  window.__diag = {
+    yearsText: out.yearsText || "无（此情形无需年限）",
+    n: out.n != null ? fmt(out.n) : "-",
+    dai: out.dai != null ? fmt(out.dai) : "-",
+    total: fmt(total)
+  };
+  $("#copy").disabled = false;
+}
+$("#run").addEventListener("click", calc);
+$("#clr").addEventListener("click", function(){
+  document.querySelectorAll("input, select").forEach(function(x){ if(x.type === "checkbox"){ x.checked = false; } else { x.value = ""; } });
+  $("#result").innerHTML = ""; $("#state").textContent = ""; lastReport = null; $("#copy").disabled = true;
+});
+$("#copy").addEventListener("click", function(){
+  if(!lastReport) return;
+  var done = function(){ $("#state").textContent = "结果已复制"; };
+  var fail = function(){ $("#state").textContent = "复制没成功，可手动截屏"; };
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){ navigator.clipboard.writeText(lastReport).then(done, fail); }
+    else{ var ta = document.createElement("textarea"); ta.value = lastReport; document.body.appendChild(ta); ta.select(); var ok = document.execCommand("copy"); ta.remove(); (ok ? done : fail)(); }
+  }catch(e){ fail(); }
+});
+
+/* 自测开关：?selftest=1 → 填入探针数据自动计算，横幅打印关键结果（预期：N=5.5 个月 44000 元，+1=8000，合计 52000） */
+if(location.search.indexOf("selftest") >= 0){
+  $("#scen").value = "5";
+  $("#dIn").value = "2019-01-01"; $("#dOut").value = "2024-06-15";
+  $("#avg").value = "8000"; $("#minw").value = "2200"; $("#socavg").value = "10000"; $("#lastm").value = "8000";
+  calc();
+  var s = window.__diag || {};
+  var b = document.createElement("div");
+  b.id = "selftest-banner";
+  b.style.cssText = "background:#0F2E1F;color:#FFF;font-size:18px;font-weight:700;padding:13px 16px;border-radius:8px;margin:0 0 14px;line-height:1.5";
+  b.textContent = "SELFTEST 年限=" + (s.yearsText || "?") + " N金额=" + (s.n || "?") + " 代通知金=" + (s.dai || "?") + " 合计=" + (s.total || "?");
+  document.body.insertBefore(b, document.body.firstChild);
+  document.title = b.textContent;
+}
+</script>
+</body>
+</html>
